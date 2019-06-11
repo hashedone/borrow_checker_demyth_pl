@@ -687,3 +687,5 @@ fn foo<'a>(x: &'a i32) -> impl T + 'a {
 # Dziękuję
 
 ## Pytania?
+
+https://github.com/hashedone/borrow_checker_demyth_pl
