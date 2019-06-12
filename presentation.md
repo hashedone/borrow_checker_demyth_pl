@@ -437,8 +437,8 @@ fn main() {
 fn foo<'a>(x: &'a i32) -> &'a i32 { x }
 
 fn main() {
-    let a = 40;
-    let b = foo(&a);
+    let arg = 40;
+    let res = foo(&a);
 }
 ```
 
@@ -450,9 +450,9 @@ fn main() {
 fn foo<'a>(x: &'a i32) -> &'a i32 { x }
 
 fn main() {
-    'a: {
-        let a: i32 + 'a = 40;
-        let b: &'a i32 = foo::<'a>(&a);
+    'scope: {
+        let arg: i32 + 'scope = 40;
+        let res: &'scope i32 = foo::<'scope>(&a);
     }
 }
 ```
@@ -475,13 +475,13 @@ fn main() {
 #### Borrows a struktury
 
 ```rust
-struct A {
-    a: &i32,
+struct Foo {
+    bar: &i32,
 }
 
 fn main() {
     let x = 15;
-    let a = A { a: &x };
+    let a = Foo { bar: &x };
 }
 ```
 ====
@@ -489,13 +489,13 @@ fn main() {
 #### Borrows a struktury
 
 ```rust
-struct A {
-    a: &i32,
+struct Foo {
+    bar: &i32,
 }
 
 fn main() {
     let x = 15;
-    let a = A { a: &x };
+    let foo = Foo { bar: &x };
 }
 ```
 
@@ -503,8 +503,8 @@ fn main() {
 error[E0106]: missing lifetime specifier
  --> src/main.rs:2:8
   |
-2 |     a: &i32,
-  |        ^ expected lifetime parameter
+2 |     bar: &i32,
+  |          ^ expected lifetime parameter
 
 ```
 
@@ -513,13 +513,13 @@ error[E0106]: missing lifetime specifier
 #### Borrows a struktury
 
 ```rust
-struct A<'a> {
-    a: &'a i32,
+struct Foo<'a> {
+    bar: &'a i32,
 }
 
 fn main() {
     let x = 15;
-    let a = A { a: &x };
+    let foo = Foo { bar: &x };
 }
 ```
 
@@ -528,16 +528,16 @@ fn main() {
 #### Borrows a struktury
 
 ```rust
-struct A<'a> {
-    a: &'a i32,
+struct Foo<'a> {
+    bar: &'a i32,
 }
 
-fn foo<'a>(x: A<'a>) -> &'a i32 { x.a }
+fn take_foo<'a>(x: Foo<'a>) -> &'a i32 { x.bar }
 
 fn main() {
     let x = 15;
-    let a = A { a: &x };
-    let b = foo(a);
+    let foo = Foo { bar: &x };
+    let b = take_foo(foo);
 }
 ```
 
@@ -546,19 +546,19 @@ fn main() {
 #### Struktury CD
 
 ```rust
-struct A { a: i32 }
+struct Foo { bar: i32 }
 
-impl A {
-    fn get_a(&self) -> &i32 { &self.a }
-    fn get_mut_a(&mut self) -> &mut i32 { &mut self.a }
+impl Foo {
+    fn get_bar(&self) -> &i32 { &self.bar }
+    fn get_mut_bar(&mut self) -> &mut i32 { &mut self.bar }
 }
 
 fn main() {
-    let a = A { a: 40 };
-    let a_ref = a.get_a();
-    let a_mut = a.get_mut_a();
-    println!("{}", a_ref); // < Compile error
-    *a_mut = 20;
+    let foo = Foo { bar: 40 };
+    let bar_ref = foo.get_bar();
+    let bar_mut = foo.get_mut_bar();
+    println!("{}", bar_ref); // < Compile error
+    *bar_mut = 20;
 }
 ```
 
@@ -567,20 +567,20 @@ fn main() {
 #### Struktury CD
 
 ```rust
-struct A { a: i32, b: i32 }
+struct Foo { xxx: i32, yyy: i32 }
 
-impl A {
-    fn get_a(&self) -> &i32 { &self.a }
-    fn get_mut_b(&mut self) -> &mut i32 { &mut self.b }
+impl Foo {
+    fn get_xxx(&self) -> &i32 { &self.xxx }
+    fn get_mut_yyy(&mut self) -> &mut i32 { &mut self.yyy }
 }
 
 fn main() {
-    let mut x = A { a: 10, b: 20 };
-    let a = x.get_a();
-    if a > 10 {
-        *x.get_b() = 30;
+    let mut foo = Foo { xxx: 10, yyy: 20 };
+    let x = foo.get_xxx();
+    if x > 10 {
+        *foo.get_yyy() = 30;
     }
-    pritnln!("{}", a);
+    pritnln!("{}", x);
 }
 ```
 
@@ -589,19 +589,19 @@ fn main() {
 #### Struktury CD
 
 ```rust
-struct A { a: i32, b: i32 }
+struct Foo { xxx: i32, yyy: i32 }
 
-impl A {
+impl Foo {
     fn split(&mut self) -> (&i32, &mut i32) {
-        (&self.a, &mut self.b)
+        (&self.xxx, &mut self.yyy)
     }
 }
 
 fn main() {
-    let mut x = A { a: 10, b: 20 };
-    let (a, b) = x.split();
-    if *a > 10 { *b = 30; }
-    println!("{}", a);
+    let mut foo = Foo { xxx: 10, yyy: 20 };
+    let (x, y) = foo.split();
+    if *x > 10 { *y = 30; }
+    println!("{}", x);
 }
 ```
 
@@ -614,13 +614,13 @@ trait T<'a> {
     fn get(&self) -> &'a i32;
 }
 
-struct A<'a> { a: &'a i32 }
+struct Foo<'b> { bar: &'b i32 }
 
-impl<'a> T<'a> for A<'a> {
-    fn get(&self) -> &'a i32 { self.a }
+impl<'x> T<'x> for Foo<'x> {
+    fn get(&self) -> &'x i32 { self.bar }
 }
 
-fn foo<'a>(x: impl T<'a>) -> &'a i32 { x.get() }
+fn foo<'y>(arg: impl T<'y>) -> &'y i32 { x.get() }
 ```
 
 ====
@@ -630,14 +630,14 @@ trait T {
     fn get<'a>(&'a self) -> &'a i32;
 }
 
-struct A<'a> { a: &'a i32 }
+struct Foo<'b> { bar: &'b i32 }
 
-impl<'a> T for A<'a> {
-    fn get<'b>(&'b self) -> &'b i32 { self.a }
+impl<'x> T for Foo<'x> {
+    fn get<'c>(&'c self) -> &'c i32 { self.bar }
 }
 
-fn foo<'a>(x: &'a i32) -> impl T {
-    A { a: x }
+fn take_foo<'y>(arg: &'y i32) -> impl T {
+    Foo { bar: arg }
 }
 ```
 
@@ -648,20 +648,20 @@ fn foo<'a>(x: &'a i32) -> impl T {
 error: cannot infer an appropriate lifetime
   --> src/lib.rs:12:5
    |
-11 | fn foo<'a>(x: &'a i32) -> impl T {
-   |                           ------ this return type evaluates to the `'static` lifetime...
-12 |     A { a: x }
-   |     ^      - ...but this borrow...
+11 | fn take_foo<'y>(arg: &'y i32) -> impl T {
+   |                                  ------ this return type evaluates to the `'static` lifetime...
+12 |     Foo { bar: arg }
+   |     ^          - ...but this borrow...
    |
-note: ...can't outlive the lifetime 'a as defined on the function body at 11:8
+note: ...can't outlive the lifetime 'y as defined on the function body at 11:8
   --> src/lib.rs:11:8
    |
-11 | fn foo<'a>(x: &'a i32) -> impl T {
-   |        ^^
-help: you can add a constraint to the return type to make it last less than `'static` and match the lifetime 'a as defined on the function body at 11:8
+11 | fn take_foo<'y>(x: &'y i32) -> impl T {
+   |             ^^
+help: you can add a constraint to the return type to make it last less than `'static` and match the lifetime 'y as defined on the function body at 11:8
    |
-11 | fn foo<'a>(x: &'a i32) -> impl T + 'a {
-   |                           ^^^^^^^^^^^
+11 | fn take_foo<'y>(x: &'y i32) -> impl T + 'y {
+   |                                ^^^^^^^^^^^
 ```
 
 ====
@@ -671,14 +671,14 @@ trait T {
     fn get<'a>(&'a self) -> &'a i32;
 }
 
-struct A<'a> { a: &'a i32 }
+struct Foo<'b> { bar: &'b i32 }
 
-impl<'a> T for A<'a> {
-    fn get<'b>(&'b self) -> &'b i32 { self.a }
+impl<'x> T for Foo<'x> {
+    fn get<'c>(&'c self) -> &'c i32 { self.bar }
 }
 
-fn foo<'a>(x: &'a i32) -> impl T + 'a {
-    A { a: x }
+fn take_foo<'y>(x: &'y i32) -> impl T + 'y {
+    Foo { bar: arg }
 }
 ```
 
