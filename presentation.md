@@ -649,7 +649,8 @@ error: cannot infer an appropriate lifetime
   --> src/lib.rs:12:5
    |
 11 | fn take_foo<'y>(arg: &'y i32) -> impl T {
-   |                                  ------ this return type evaluates to the `'static` lifetime...
+   |                                  ------ this return type evaluates
+   |                                         to the `'static` lifetime...
 12 |     Foo { bar: arg }
    |     ^          - ...but this borrow...
    |
@@ -658,7 +659,9 @@ note: ...can't outlive the lifetime 'y as defined on the function body at 11:8
    |
 11 | fn take_foo<'y>(x: &'y i32) -> impl T {
    |             ^^
-help: you can add a constraint to the return type to make it last less than `'static` and match the lifetime 'y as defined on the function body at 11:8
+help: you can add a constraint to the return type to make it last less
+   |  than `'static` and match the lifetime 'y as defined on the
+   |  function body at 11:8
    |
 11 | fn take_foo<'y>(x: &'y i32) -> impl T + 'y {
    |                                ^^^^^^^^^^^
